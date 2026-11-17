@@ -2,7 +2,7 @@
 
 import streamlit as st
 
-from semantic_search import INDEX_PATH, build_index, load_stories, search
+from semantic_search import build_index, load_stories, search
 
 
 st.set_page_config(page_title="Sherlock Holmes Semantic Search", page_icon="🔎")
@@ -49,12 +49,11 @@ if submitted:
             results = search(query, top_k, None if story == "All stories" else story)
         st.subheader(f"{len(results)} closest passages")
         for rank, match in enumerate(results, start=1):
-            st.markdown(f"### {rank}. {match['story']}")
-            st.caption(
-                f"Passage {match['chunk_number']} · "
-                f"Cosine similarity {match['similarity']:.3f}"
+            st.markdown(
+                f"### Result {rank}: {match['story']} — Passage {match['chunk_number']}"
             )
             st.write(match["text"])
+            st.caption(f"Cosine similarity {match['similarity']:.3f}")
             st.link_button("Read the full collection", match["source_url"])
             st.divider()
 
