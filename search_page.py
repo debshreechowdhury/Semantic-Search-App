@@ -4,7 +4,7 @@ from urllib.parse import urlencode, urlsplit
 
 import streamlit as st
 
-from semantic_search import build_index, load_stories, search
+from semantic_search import build_index, load_stories, search_stories
 
 
 PUBLIC_APP_URL = "https://sherlock-holmes-semantic-search.streamlit.app"
@@ -27,7 +27,8 @@ def reader_url(story: str) -> str:
 
 st.title("🔎 Sherlock Holmes Semantic Search")
 st.write(
-    "Find passages by meaning across the twelve stories in "
+    "Describe a theme, such as **murder mystery** or **romance thriller**, "
+    "and find related stories with a passage from each one in "
     "*The Adventures of Sherlock Holmes*."
 )
 st.caption(
@@ -45,30 +46,26 @@ titles = [title for title, _ in load_stories()]
 st.caption(f"{len(titles)} stories · {passage_count} searchable passages")
 with st.form("search"):
     query = st.text_input(
-        "Describe what you want to find",
-        placeholder="For example: a mysterious visitor wearing a mask",
+        "Story theme or description",
+        placeholder="For example: murder mystery or romance thriller",
     )
     story = st.selectbox("Story", ["All stories", *titles])
-    top_k = st.slider("Number of results", 1, 10, 5)
+    top_k = st.slider("Number of stories", 1, 10, 3)
     submitted = st.form_submit_button("Search", type="primary")
 
 if submitted:
     if not query.strip():
         st.warning("Enter a search question or description.")
     else:
-        with st.spinner("Searching passages…"):
-            results = search(query, top_k, None if story == "All stories" else story)
-        st.subheader(f"{len(results)} closest passages")
+        with st.spinner("Finding related stories…"):
+            results = search_stories(query, top_k, None if story == "All stories" else story)
+        st.subheader(f"{len(results)} matching {'story' if len(results) == 1 else 'stories'}")
         for rank, match in enumerate(results, start=1):
-            st.markdown(
-                f"### Result {rank}: {match['story']} — Passage {match['chunk_number']}"
-            )
+            st.markdown(f"### {rank}. {match['story']}")
+            st.write(match["description"])
+            st.markdown(f"**Related passage {match['chunk_number']}**")
             st.write(match["text"])
-            st.caption(f"Cosine similarity {match['similarity']:.3f}")
             st.link_button("Read the full story", reader_url(match["story"]))
             st.divider()
 
-st.caption(
-    "Similarity ranks passages; it is not a probability or a generated answer. "
-    "Read the surrounding story to confirm context."
-)
+st.caption("Stories are ranked by meaning using plot descriptions and source passages. Read the full story for context.")
