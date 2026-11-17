@@ -54,7 +54,7 @@ if submitted:
             )
             st.write(match["text"])
             st.caption(f"Cosine similarity {match['similarity']:.3f}")
-            st.link_button("Read the full collection", match["source_url"])
+            st.link_button("Read the full collection", match["read_url"])
             st.divider()
 
 st.caption(

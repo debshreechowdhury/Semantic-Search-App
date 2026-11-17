@@ -16,6 +16,10 @@ BOOK_PATH = ROOT / "data" / "sherlock_1661.txt"
 INDEX_PATH = ROOT / "data" / "chroma"
 COLLECTION_NAME = "sherlock_stories"
 SOURCE_URL = "https://www.gutenberg.org/ebooks/1661"
+READ_URL = (
+    "https://github.com/GITenberg/"
+    "The-Adventures-of-Sherlock-Holmes_1661/blob/master/1661.txt"
+)
 HEADING = re.compile(r"^(?:ADVENTURE )?([IVX]+)\. ([A-Z][A-Z '\-]+)$", re.MULTILINE)
 START = "*** START OF THIS PROJECT GUTENBERG EBOOK THE ADVENTURES OF SHERLOCK HOLMES ***"
 END = "End of the Project Gutenberg EBook of The Adventures of Sherlock Holmes"
@@ -142,6 +146,7 @@ def search(
             "story": metadata["story"],
             "chunk_number": metadata["chunk_number"],
             "source_url": metadata["source_url"],
+            "read_url": READ_URL,
             "similarity": 1.0 - distance,
         }
         for text, metadata, distance in zip(
