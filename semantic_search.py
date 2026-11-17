@@ -16,10 +16,6 @@ BOOK_PATH = ROOT / "data" / "sherlock_1661.txt"
 INDEX_PATH = ROOT / "data" / "chroma"
 COLLECTION_NAME = "sherlock_stories"
 SOURCE_URL = "https://www.gutenberg.org/ebooks/1661"
-READ_URL = (
-    "https://github.com/GITenberg/"
-    "The-Adventures-of-Sherlock-Holmes_1661/blob/master/1661.txt"
-)
 HEADING = re.compile(r"^(?:ADVENTURE )?([IVX]+)\. ([A-Z][A-Z '\-]+)$", re.MULTILINE)
 START = "*** START OF THIS PROJECT GUTENBERG EBOOK THE ADVENTURES OF SHERLOCK HOLMES ***"
 END = "End of the Project Gutenberg EBook of The Adventures of Sherlock Holmes"
@@ -30,7 +26,9 @@ if model_cache := os.environ.get("SEMANTIC_MODEL_CACHE_DIR"):
     ONNXMiniLM_L6_V2.DOWNLOAD_PATH = Path(model_cache)
 
 
-def load_stories(path: Path = BOOK_PATH) -> list[tuple[str, str]]:
+def load_stories(
+    path: Path = BOOK_PATH, preserve_paragraphs: bool = False
+) -> list[tuple[str, str]]:
     """Return the twelve stories, excluding contents and license boilerplate."""
     raw = path.read_text(encoding="ascii")
     body = raw.split(START, 1)[1].split(END, 1)[0]
@@ -41,7 +39,14 @@ def load_stories(path: Path = BOOK_PATH) -> list[tuple[str, str]]:
     for number, match in enumerate(headings):
         end = headings[number + 1].start() if number + 1 < len(headings) else len(body)
         text = body[match.end() : end]
-        text = re.sub(r"\s+", " ", text).strip()
+        if preserve_paragraphs:
+            paragraphs = [
+                re.sub(r"\s+", " ", paragraph).strip()
+                for paragraph in re.split(r"\n\s*\n", text)
+            ]
+            text = "\n\n".join(paragraph for paragraph in paragraphs if paragraph)
+        else:
+            text = re.sub(r"\s+", " ", text).strip()
         stories.append((match.group(2).title(), text))
     return stories
 
@@ -146,7 +151,6 @@ def search(
             "story": metadata["story"],
             "chunk_number": metadata["chunk_number"],
             "source_url": metadata["source_url"],
-            "read_url": READ_URL,
             "similarity": 1.0 - distance,
         }
         for text, metadata, distance in zip(

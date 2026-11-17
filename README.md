@@ -26,7 +26,7 @@ Open `semantic_search.ipynb` for the notebook version of the activity. It shows 
 1. Read the twelve stories from `data/sherlock_1661.txt`; remove the eBook preface and license from searchable text.
 2. Split each story into 180-word passages with 35 words of overlap. Chunks never cross story boundaries.
 3. Embed each passage with Chroma's default ONNX `all-MiniLM-L6-v2` model and store it in a persistent Chroma collection with story title and passage number.
-4. Embed a user query with the same model and retrieve the closest passages by cosine distance. The Streamlit app displays the matching passage and a source link.
+4. Embed a user query with the same model and retrieve the closest passages by cosine distance. The Streamlit app displays the matching passage and opens the complete story in its own reading page.
 
 This is retrieval, not a chatbot. Similarity scores rank passages; they are not probabilities that a passage answers the question.
 
